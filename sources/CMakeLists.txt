@@ -1,17 +1,13 @@
 include(GenerateExportHeader)
 
-IF (NOT DEFINED CMAKE_MODULE_PATH)
-  GET_FILENAME_COMPONENT(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../CMakeModules" ABSOLUTE)
-ENDIF (NOT DEFINED CMAKE_MODULE_PATH)
-
 SET( target citygml )
 
 IF( LIBCITYGML_USE_OPENGL)
-  FIND_PACKAGE( OpenGL REQUIRED )
+  FIND_PACKAGE( glu REQUIRED )
 ELSE( LIBCITYGML_USE_OPENGL )
   SET( GLU_INCLUDE_PATH "" )
 ENDIF( LIBCITYGML_USE_OPENGL )
-FIND_PACKAGE( Xerces REQUIRED )
+FIND_PACKAGE( XercesC REQUIRED )
 
 # gdal library
 OPTION(LIBCITYGML_USE_GDAL "Set to ON to build libcitygml with GDAL library so that it supports coordinates transformations." ON)
@@ -45,14 +41,11 @@ ADD_DEFINITIONS( -DCITYGML_LIBRARY )
 
 ADD_DEFINITIONS( -DLIBCITYGML_BUILD )
 
-configure_file("${CMAKE_MODULE_PATH}/citygml_api.h.in" ${CMAKE_CURRENT_SOURCE_DIR}/include/citygml/citygml_api.h)
+configure_file("${CMAKE_SOURCE_DIR}/CMakeModules/citygml_api.h.in" ${CMAKE_CURRENT_SOURCE_DIR}/include/citygml/citygml_api.h)
 
 SET(EXPORT_HEADER_FILE_NAME ${CMAKE_CURRENT_SOURCE_DIR}/include/citygml/citygml_export.h)
 
-INCLUDE_DIRECTORIES(    ${CMAKE_CURRENT_SOURCE_DIR}/include
-                        ${XERCESC_INCLUDE}
-                        ${GLU_INCLUDE_PATH}
-                        ${GDAL_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(    ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 SET(SOURCES
   src/citygml/attributesmap.cpp
@@ -176,8 +169,6 @@ endif(LIBCITYGML_USE_OPENGL)
 SET(HEADERS
   ${PUBLIC_HEADER}
 
-  ${CMAKE_MODULE_PATH}/citygml_api.h.in
-
   include/citygml/utils.h
   include/citygml/appearancemanager.h
   include/citygml/polygonmanager.h
@@ -224,12 +215,12 @@ generate_export_header(citygml
                        EXPORT_MACRO_NAME LIBCITYGML_EXPORT
                        EXPORT_FILE_NAME ${EXPORT_HEADER_FILE_NAME})
 
-TARGET_LINK_LIBRARIES( ${target} PUBLIC ${XERCESC_LIBRARIES} )
+TARGET_LINK_LIBRARIES( ${target} PUBLIC XercesC::XercesC )
 if(LIBCITYGML_USE_OPENGL)
-  TARGET_LINK_LIBRARIES( ${target} PUBLIC ${OPENGL_LIBRARIES} )
+  TARGET_LINK_LIBRARIES( ${target} PUBLIC glu::glu )
 endif(LIBCITYGML_USE_OPENGL)
 if(LIBCITYGML_USE_GDAL)
-    TARGET_LINK_LIBRARIES( ${target} PUBLIC ${GDAL_LIBRARY} )
+    TARGET_LINK_LIBRARIES( ${target} PUBLIC GDAL::GDAL )
 endif(LIBCITYGML_USE_GDAL)
 
 set_target_properties( ${target} PROPERTIES
